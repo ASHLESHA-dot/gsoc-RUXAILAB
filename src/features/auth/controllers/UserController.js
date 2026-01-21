@@ -23,6 +23,19 @@ export default class UserController extends Controller {
     return super.set(COLLECTION, payload.id, user);
   }
 
+  async isUsernameTaken(username) {
+    const normalized = (username || '').trim()
+    if (!normalized) return false
+
+    const q = {
+      field: 'username',
+      condition: '==',
+      value: normalized,
+    }
+    const res = await super.query(COLLECTION, q)
+    return !res.empty
+  }
+
   async update(docId, payload) {
     return super.update(COLLECTION, docId, payload);
   }

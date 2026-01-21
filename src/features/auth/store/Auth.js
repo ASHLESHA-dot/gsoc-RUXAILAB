@@ -63,20 +63,39 @@ export default {
      */
     async signup({ commit }, payload) {
       try {
+        const username = (payload.username || '').trim()
+        if (username) {
+          const taken = await userController.isUsernameTaken(username)
+          if (taken) {
+            commit('SET_TOAST', {
+              message: i18n.global.t('errors.usernameAlreadyTaken'),
+              type: 'error',
+            })
+            throw new Error('USERNAME_TAKEN')
+          }
+        }
+
         const { user } = await authController.signUp(
           payload.email,
           payload.password,
         )
-        await userController.create({ id: user.uid, email: user.email, username: payload.username })
+        await userController.create({ id: user.uid, email: user.email, username })
         commit('SET_TOAST', {
           message: i18n.global.t('auth.signupSuccess'),
           type: 'success',
         })
       } catch (err) {
-        commit('SET_TOAST', {
-          message: i18n.global.t('errors.globalError'),
-          type: 'error',
-        })
+        if (err?.code === 'auth/email-already-in-use') {
+          commit('SET_TOAST', {
+            message: i18n.global.t('errors.emailAlreadyInUse'),
+            type: 'error',
+          })
+        } else if (err?.message !== 'USERNAME_TAKEN') {
+          commit('SET_TOAST', {
+            message: i18n.global.t('errors.globalError'),
+            type: 'error',
+          })
+        }
         throw err
       } finally {
         commit('setLoading', false)
@@ -102,7 +121,17 @@ export default {
           type: 'success',
         })
       } catch (err) {
-        showError('errors.incorrectCredential')
+        if (
+          err?.code === 'auth/invalid-credential' ||
+          err?.code === 'auth/wrong-password' ||
+          err?.code === 'auth/user-not-found'
+        ) {
+          showError('errors.invalidCredentials')
+        } else if (err?.code === 'auth/too-many-requests') {
+          showError('errors.tooManyAttempts')
+        } else {
+          showError('errors.globalError')
+        }
       } finally {
         commit('setLoading', false)
       }
