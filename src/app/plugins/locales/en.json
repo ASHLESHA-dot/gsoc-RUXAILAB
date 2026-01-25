@@ -1133,5 +1133,24 @@
   "taskCreation": {
     "taskDescription": "Task Description",
     "taskDescriptionHelper": "Provide detailed instructions for participants. Include the goal, context, and any specific steps they should follow."
+  },
+  "manager": {
+    "inviteParticipant": "Invite Participant",
+    "all": "All",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "notStarted": "Not Started",
+    "noParticipants": "No participants yet",
+    "noParticipantsInFilter": "No participants match the current filter",
+    "viewDetails": "View Details",
+    "sendReminder": "Send Reminder",
+    "removeParticipant": "Remove Participant",
+    "participantStatus": {
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "invited": "Invited",
+      "notStarted": "Not Started",
+      "noActivity": "No activity"
+    }
   }
 }
