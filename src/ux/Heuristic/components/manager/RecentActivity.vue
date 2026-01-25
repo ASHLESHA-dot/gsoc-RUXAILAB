@@ -1,3 +1,4 @@
+
 <template>
   <v-card v-if="test" class="pa-4 mb-0" elevation="3" rounded="lg">
     <!-- Header con icono a la izquierda y título -->
@@ -5,14 +6,12 @@
       <v-icon size="24" color="primary" class="header-icon">mdi-timeline-text-outline</v-icon>
       <v-card-title class="text-h6 text-primary clickable-title">{{ $t('Dashboard.cards.recentActivity') }}</v-card-title>
     </div>
-    
     <!-- Métrica principal -->
     <div class="main-metric mb-4">
       <div class="metric-subtitle text-caption text-grey-darken-1">{{ $t('Dashboard.cards.activities7Days') }}</div>
       <div class="metric-value text-h3 font-weight-bold">{{ recentActivitiesCount }}</div>
       <div class="metric-change text-caption" :class="changeColor">{{ activityChange }}</div>
     </div>
-    
     <!-- Información adicional -->
     <div class="additional-info">
       <div class="info-subtitle text-caption text-grey-darken-1">{{ $t('Dashboard.cards.lastActivity') }}</div>
@@ -23,10 +22,9 @@
 
 <script setup>
 import { computed } from 'vue'
-import { formatDistanceToNow } from 'date-fns'
-import { es } from 'date-fns/locale' // TODO: Dynamic locale based on i18n
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useDateLocale } from '@/composables/useDateLocale'
 
 const props = defineProps({
   test: {
@@ -37,7 +35,15 @@ const props = defineProps({
 
 const emit = defineEmits(['view-all'])
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const { formatRelativeTime } = useDateLocale()
+
+// DEBUG: Hardcoded demo dates
+const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000)
+const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
+const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+const lastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+const currentLang = computed(() => locale.value)
 
 // Navigate to activity section
 const navigateToActivity = () => {
@@ -58,10 +64,7 @@ const activities = computed(() => {
           id: `coop-${coop.userDocId}`,
           title: t('Dashboard.cards.evaluationUpdated'),
           description: `${coop.email} ${t('Dashboard.cards.updatedProgress')}`,
-          timeAgo: formatDistanceToNow(new Date(coop.updateDate), { 
-            addSuffix: true, 
-            locale: es 
-          }),
+          timeAgo: formatRelativeTime(coop.updateDate),
           color: coop.progress === 100 ? 'success' : 'warning',
           timestamp: new Date(coop.updateDate)
         })

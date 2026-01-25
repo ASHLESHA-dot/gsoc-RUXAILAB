@@ -128,8 +128,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { formatDistanceToNow } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { useI18n } from 'vue-i18n'
+import { useDateLocale } from '@/composables/useDateLocale'
 
 const props = defineProps({
   test: {
@@ -139,6 +139,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['invite-participant', 'view-participant', 'send-reminder', 'remove-participant'])
+
+// Initialize composable
+const { formatRelativeTime } = useDateLocale()
+const { t } = useI18n()
 
 // State
 const selectedFilter = ref('all')
@@ -195,19 +199,16 @@ const getStatusColor = (participant) => {
 }
 
 const getStatusText = (participant) => {
-  if (participant.progress === 100) return 'Completado'
-  if (participant.progress > 0) return 'En Progreso'
-  if (participant.invited && !participant.accepted) return 'Invitado'
-  return 'Sin Empezar'
+  if (participant.progress === 100) return t('manager.participantStatus.completed')
+  if (participant.progress > 0) return t('manager.participantStatus.inProgress')
+  if (participant.invited && !participant.accepted) return t('manager.participantStatus.invited')
+  return t('manager.participantStatus.notStarted')
 }
 
 const getLastActivity = (participant) => {
-  if (!participant.updateDate) return 'Sin actividad'
+  if (!participant.updateDate) return t('manager.participantStatus.noActivity')
   
-  return formatDistanceToNow(new Date(participant.updateDate), { 
-    addSuffix: true, 
-    locale: es 
-  })
+  return formatRelativeTime(participant.updateDate)
 }
 
 const toggleShowAll = () => {
